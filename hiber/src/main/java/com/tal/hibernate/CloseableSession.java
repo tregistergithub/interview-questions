@@ -15,13 +15,6 @@ public class CloseableSession implements AutoCloseable {
     }
 
 	public void close() throws Exception {
-		// TODO Auto-generated method stub
-		
+      session.close();
 	}
-
-
-
-//    public void close() {
-//        session.close();
-//    }
 }

@@ -13,7 +13,7 @@ public class CheckParenthesis {
 		// printIsValid("]dd[");
 		// printIsValid("]");
 		// printIsValid("}");
-		// printIsValid("[]}");
+		printIsValid("{[]}");
 		// printIsValid("{[]}");
 //		printIsValid("|||");
 //		printIsValid("<|<||>|>");
@@ -21,7 +21,7 @@ public class CheckParenthesis {
 		printIsValid("<|<||>|>|| <|<||>|>");
 		printIsValid("|");
 		printIsValid("|{||}|||");
-		printIsValid("|||");
+		printIsValid("||");
 	}
 
 	private static void printIsValid(String s) {
