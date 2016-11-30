@@ -1,6 +1,6 @@
 package com.tal;
 
-public class Fibonachi {
+public class Fibonacci {
 
 	public static int n = 47;
 	public static Long[] tempRes = new Long[n + 1];
