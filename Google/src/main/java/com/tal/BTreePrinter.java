@@ -17,12 +17,12 @@ public class BTreePrinter {
 	}
 
 	private void print(String prefix, boolean isTail) {
-		System.out.println(prefix + (isTail ? "└── " : "├── ") + name);
+		System.out.println(prefix + (isTail ? "aaa" : " bbb") + name);
 		for (int i = 0; i < children.size() - 1; i++) {
-			children.get(i).print(prefix + (isTail ? "    " : "│   "), false);
+			children.get(i).print(prefix + (isTail ? "    " : "----"), false);
 		}
 		if (children.size() > 0) {
-			children.get(children.size() - 1).print(prefix + (isTail ? "    " : "│   "), true);
+			children.get(children.size() - 1).print(prefix + (isTail ? "    " : "---  "), true);
 		}
 	}
 }
