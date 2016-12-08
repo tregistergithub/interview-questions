@@ -1,13 +1,13 @@
 package com.tbla.tbz.calc;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 // TODO add interface
 public class HashMapMemory implements Memory {
-	private Map<String, Integer> memory = new HashMap<>();
+	private Map<String, Integer> memory = new TreeMap<>();
 
 	@Override
 	public String toString() {

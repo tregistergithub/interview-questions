@@ -3,21 +3,12 @@ package com.tbla.tbz.calc;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 import java.util.stream.Stream;
 
 import com.tbla.tbz.calc.Tokenizer.Token;
-
-import sun.security.util.Length;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 /**
  * Question 1
@@ -38,11 +29,11 @@ import java.util.LinkedList;
 // TODO handle unary minus
 // TODO handle design
 public class Calculator {
+	private static final int NUMBER_OF_REQUIRED_OPERANDS_FOR_BINARY_OPERATION = 2;
 	private static final int ASSIGNMENT_OPERATOR_NOT_FOUND = -1;
-	private static final int VAR_POSITION = 0;
-	private static final int EXPRESSION_POSITION = 1;
+	private static final int SINGLE_FINAL_RESULT = 1;
 	private static Memory memory;
-	private static boolean isVerbose = true;
+	private static boolean isVerbose = false;
 
 	public static void main(String[] args) {
 
@@ -58,16 +49,37 @@ public class Calculator {
 
 		int i = 3;
 
-		int j = i++ + i++ + i++ + i++;
+		int j = i+++i+++i+++i++;
+		j += i+ +i;
 		int m = 3;
+		int c = 3+ + + + + +3;
 		int k = ++m + ++m + ++m + ++m;
+		
+		
+		i =9;
+		j = 3+ i-- - 3 +3;
+		i +=9;
+		j += i++;
+		j += j++;
 		Stream.of(// "i = 2 + 3", "j=30 - 33", "k=2+4/2+2/2", "n=i+j",
 					// "foo=(2+4)/2+2/2", "puki=1*2+3",
 					// "tiki=2*((2*puki*(foo-1))-2)-3", "sami=puki",
-				// "i=0",
-				// "i-=3",
-				// "i*=3",
-				"i = 0", "j = ++i", "x = i++ + 5", "y = 5 + 3", "i += y").forEach(p -> calculateLine(p));
+				"i =9",
+				"j = 3+ i-- - 3 +3",
+				 "i +=9",
+				 "j += i++",
+				 "j += j++"
+//				 "x = i+++ 5",
+//				 "y = 5 + 3 * 10",
+//				 "i += y",
+//				// "i-=3",
+//				// "i*=3",
+//				"i = 3", 
+//				"r = i+++i+++i+++i++"
+				//"m = 3",
+				//"k = ++m + ++m + ++m + ++m"
+				// "x = i++ + 5", "y = 5 + 3", "i += y"
+				).forEach(p -> calculateLine(p));
 		// calculateLine("i = 2 + 3");
 		System.out.println(memory);
 	}
@@ -135,7 +147,7 @@ public class Calculator {
 					System.out.println(variableName);
 
 				if (indexOfAssignmentOperator + assignmentOperator.length() < inputLine.length()) {
-					mathExpression = inputLine.substring(indexOfAssignmentOperator + assignmentOperator.length());
+					mathExpression = inputLine.substring(indexOfAssignmentOperator + assignmentOperator.length()).trim();
 				} else {
 					throw new ParserException("Missing mathematical expression in the input line " + inputLine);
 				}
@@ -145,6 +157,10 @@ public class Calculator {
 			}
 		}
 
+		if (mathExpression.isEmpty()) {
+			throw new ParserException("Missing mathematical expression for variable " + variableName);
+		}
+		
 		if (isVerbose)
 			System.out.println(mathExpression);
 
@@ -154,24 +170,32 @@ public class Calculator {
 		List<Token> infixTokenList = new Tokenizer(mathExpression).getTokens();
 		if (isVerbose)
 			System.out.println(infixTokenList);
-		Queue<Token> postfixTokenList = infixToPostfix(infixTokenList);
+		Queue<Token> postfixTokenQueue = Token.infixToPostfix(infixTokenList);
+
 		if (isVerbose)
-			System.out.println(postfixTokenList);
-		Token result = evaluateExpression(postfixTokenList);
-		if (isMathAssignmentOperator(selectedAssignmentOperator)) {
-			postfixTokenList.add(Token.buildVariableToken(variableName));
-			postfixTokenList.add(result);
-			postfixTokenList.add(Token.buildBinaryOperatorToken(selectedAssignmentOperator.charAt(0)));
-			result = evaluateExpression(postfixTokenList);
-		}
+			System.out.println(postfixTokenQueue);
+		Token result = evaluateExpression(postfixTokenQueue);
+		
+		result = handleMathAssignmentOperator(selectedAssignmentOperator, variableName, postfixTokenQueue, result);
 
 		if (isVerbose)
 			System.out.println(result);
 		parsedStatement.setVariableName(variableName);
-		memory.put(variableName, intVal(result));
+		memory.put(variableName, integerValue(result));
 		System.out.println("===================> " + variableName + " = " + result);
 		// System.out.println(memory);
 		return parsedStatement;
+	}
+
+	private static Token handleMathAssignmentOperator(String selectedAssignmentOperator, String variableName,
+			Queue<Token> postfixTokenQueue, Token result) {
+		if (isMathAssignmentOperator(selectedAssignmentOperator)) {
+			postfixTokenQueue.add(Token.buildVariableToken(variableName));
+			postfixTokenQueue.add(result);
+			postfixTokenQueue.add(Token.buildBinaryOperatorToken(selectedAssignmentOperator.charAt(0)));
+			result = evaluateExpression(postfixTokenQueue);
+		}
+		return result;
 	}
 
 	private static String extractVariableName(String inputLine) {
@@ -197,48 +221,6 @@ public class Calculator {
 	// return inputLine.indexOf("=");
 	// }
 
-	private static Queue<Token> infixToPostfix(List<Token> tokenList) {
-		Queue<Token> outputQueue = new LinkedList<>();
-		Stack<Token> operatorStack = new Stack<>();
-
-		for (int i = 0; i < tokenList.size(); i++) {
-			Token currentToken = tokenList.get(i);
-			if (currentToken.isOperand()) {
-				outputQueue.add(currentToken);
-				
-			} else if (currentToken.isOperator()) {
-				while (!operatorStack.isEmpty() && !operatorStack.peek().isParenthesis()
-						&& currentToken.getPrecedence() <= operatorStack.peek().getPrecedence()) {
-					outputQueue.add(operatorStack.pop());
-				}
-
-				operatorStack.push(currentToken);
-
-			} else if (currentToken.isLeftParen()) {
-				operatorStack.push(currentToken);
-
-			} else if (currentToken.isRightParen()) {
-				while (!operatorStack.peek().isLeftParen()) {
-					if (operatorStack.isEmpty()) {
-						throw new ParserException("Parenthesis balancing error");
-					}
-
-					outputQueue.add(operatorStack.pop());
-				}
-				operatorStack.pop();
-			}
-		}
-
-		while (!operatorStack.isEmpty()) {
-			if (!operatorStack.isEmpty() && !operatorStack.peek().isParenthesis())
-				outputQueue.add(operatorStack.pop());
-			else
-				throw new ParserException("Parenthesis balancing error");
-		}
-
-		return outputQueue;
-	}
-
 	public static Token evaluateExpression(Queue<Token> postfixTokenQueue) {
 		Stack<Token> evalStack = new Stack<>();
 		while (!postfixTokenQueue.isEmpty()) {
@@ -248,26 +230,58 @@ public class Calculator {
 				evalStack.add(currentToken);
 
 			} else if (currentToken.isOperator()) {
+				
+				if (evalStack.size() < NUMBER_OF_REQUIRED_OPERANDS_FOR_BINARY_OPERATION) {
+					throw new RuntimeException("Missin operand(s) for operator " + currentToken.strToken);
+				}
 				Token operand1 = evalStack.pop();
 				Token operand2 = evalStack.pop();
 
-				Token result = performOperation(intVal(operand1), intVal(operand2), currentToken);
+				int intVal2 = integerValue(operand2);
+				int intVal1 = integerValue(operand1);
+				Token result = performOperation(intVal1, intVal2, currentToken);
 				evalStack.push(result);
 			}
+		}
+		if (evalStack.size() != SINGLE_FINAL_RESULT) {
+			throw new ParserException("Missing operator in mathematical expression" );
 		}
 		return evalStack.pop();
 	}
 
-	private static int intVal(Token token) {
+	private static int integerValue(Token token) {
 
 		if (token.isNumber()) {
 			return Integer.valueOf(token.strToken);
+			
 		} else if (token.isVariable()) {
 			String variableName = token.strToken;
 			Integer value = memory.get(variableName);
 			if (value == null) {
 				throw new ParserException("Undifined variable " + variableName);
 			} else {
+				if (token.specialInstructions == Tokenizer.PRE_INCREMEMNT) {
+					if (isVerbose) System.out.println("Pre INC rementing variable <" + variableName + ">");
+					
+					value++;
+					memory.put(variableName, value);
+				}
+
+				if (token.specialInstructions == Tokenizer.PRE_DECREMEMNT) {
+					if (isVerbose) System.out.println("Pre DEC rementing variable <" + variableName + ">");
+					value++;
+					memory.put(variableName, value);
+				}
+				
+				if (token.specialInstructions == Tokenizer.POST_INCREMENT) {
+					if (isVerbose) System.out.println("Post INC rementing variable <" + variableName + ">");
+					memory.put(variableName, value + 1);
+				}
+
+				if (token.specialInstructions == Tokenizer.POST_DECREMENT) {
+					if (isVerbose) System.out.println("Post DEC rementing variable <" + variableName + ">");
+					memory.put(variableName, value - 1);
+				}
 				return value;
 			}
 
