@@ -1,4 +1,4 @@
-package com.tbla.tbz.calc;
+package com.tbla.tbz.q1;
 
 // TODO add a builder
 public class ParsedStatment {

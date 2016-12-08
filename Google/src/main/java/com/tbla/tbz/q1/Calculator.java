@@ -1,4 +1,4 @@
-package com.tbla.tbz.calc;
+package com.tbla.tbz.q1;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,10 +8,10 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.stream.Stream;
 
-import com.tbla.tbz.calc.Tokenizer.Token;
+import com.tbla.tbz.q1.Tokenizer.Token;
 
 /**
- * Question 1
+ * <b>Question 1</b>
  * <p/>
  * Objective : Implement a text based calculator application. Usage of Rhino,
  * Nashorn and other similar solutions is not allowed.

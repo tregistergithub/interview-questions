@@ -1,4 +1,4 @@
-package com.tbla.tbz.calc;
+package com.tbla.tbz.q1;
 
 public class ParserException extends RuntimeException {
 	private static final long serialVersionUID = 1627942524053614840L;

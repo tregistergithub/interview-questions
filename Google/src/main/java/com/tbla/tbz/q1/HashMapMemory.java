@@ -1,4 +1,4 @@
-package com.tbla.tbz.calc;
+package com.tbla.tbz.q1;
 
 import java.util.Iterator;
 import java.util.Map;

@@ -5,7 +5,7 @@ import java.util.List;
 
 
 /**
- * Question 2
+ * <b>Question 2</b>
  * <p/> 
  * The following class has several memory and runtime inefficiencies and bugs.
  * <p/> 
