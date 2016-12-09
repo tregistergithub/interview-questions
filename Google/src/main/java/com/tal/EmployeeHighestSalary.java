@@ -70,6 +70,9 @@ public class EmployeeHighestSalary {
 		addSalary(s, new Node(500, "Jojo"));
 		addSalary(s, new Node(500, "Loria"));
 		addSalary(s, new Node(4500, "Piki"));
+		
+		
+		
 		addSalary(s, new Node(4000, "Burma"));
 		addSalary(s, new Node(3000, "Sima"));
 		addSalary(s, new Node(3000, "Tor"));

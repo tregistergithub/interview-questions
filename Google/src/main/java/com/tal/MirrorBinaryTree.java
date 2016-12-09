@@ -79,7 +79,6 @@ public class MirrorBinaryTree {
 		}
 	}
 
-
 	private static void mirrorTreeInPlace(Node n) {
 		if (n.left != null) {
 			mirrorTreeInPlace(n.left);
