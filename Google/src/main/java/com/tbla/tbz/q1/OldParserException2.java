@@ -1,10 +1,9 @@
 package com.tbla.tbz.q1;
 
-public class ParserException extends RuntimeException {
+public class OldParserException2 extends RuntimeException {
 	private static final long serialVersionUID = 1627942524053614840L;
-	
 
-	public ParserException(String msg) {
+	public OldParserException2(String msg) {
 		super(msg);
 	}
 }
