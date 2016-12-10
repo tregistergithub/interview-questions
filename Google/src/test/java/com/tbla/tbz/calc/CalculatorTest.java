@@ -1,6 +1,8 @@
 package com.tbla.tbz.calc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.stream.Stream;
 
@@ -13,9 +15,8 @@ import com.tbla.tbz.calc.memory.HashMapMemory;
 import com.tbla.tbz.calc.memory.Memory;
 import com.tbla.tbz.calc.parser.StatementException;
 import com.tbla.tbz.calc.parser.Token;
-import com.tbla.tbz.calc.parser.TokenType;
-import com.tbla.tbz.calc.parser.TokenUtil;
 import com.tbla.tbz.calc.parser.Token.EvalAction;
+import com.tbla.tbz.calc.parser.TokenType;
 
 import mockit.Invocation;
 import mockit.Mock;
@@ -40,7 +41,7 @@ public class CalculatorTest {
 				"j += i++", 
 				"j += j++"
 
-		).forEach(strStmt -> calc.evalStmtStr(strStmt));
+		).forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory",  "(i=18,j=58)", memory.toString());
 	}
@@ -56,7 +57,7 @@ public class CalculatorTest {
 				"mimi=11", 
 				"joe=		foo	   ", 
 				" 		bar	= 3")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory",  "(bar=3,foo=1,joe=1,mimi=11)", memory.toString());
 	}
@@ -72,7 +73,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + 		11	", 
 				"joe=		foo	   +9", 
 				" 		bar	= 3+3")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory",  "(bar=6,foo=38,joe=47,mimi=22)", memory.toString());
 	}
@@ -88,7 +89,7 @@ public class CalculatorTest {
 				"	mimi	=	11 - 		9	", 
 				"joe=		foo	   -9", 
 				" 		bar	= 3-3")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(bar=0,foo=-27,joe=-36,mimi=2)", memory.toString());
 	}
@@ -104,7 +105,7 @@ public class CalculatorTest {
 				"	mimi	=	11 * 		9	", 
 				"joe=		foo	   *9", 
 				" 		bar	= 3*3")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(bar=9,foo=594000,joe=5346000,mimi=99)",  memory.toString());
 	}
@@ -120,7 +121,7 @@ public class CalculatorTest {
 				"	mimi	=	11 / 		9	", 
 				"joe=		29	/ 3", 
 				" 		bar	= 3/3")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(bar=1,foo=1,joe=9,mimi=1)", memory.toString());
 	}
@@ -136,7 +137,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + 		9	* 2+20/3", 
 				"joe=		29	+ 3 * 3", 
 				" 		bar	= 3/3*3/2+3    /	3 + 3*3+3*3+3*2")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(bar=26,foo=56,joe=38,mimi=35)", memory.toString());
 	}
@@ -151,7 +152,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + 		9	* 2+20/3", 
 				"mimi+=		29	+ 3 * 3", 
 				" 		foo	+= mimi + 3/3*3/2+3    /	3 + 3*3+3*3+3*2")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(foo=182,mimi=73)", memory.toString());
 	}
@@ -174,7 +175,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + 		9	* 2+20/3", 
 				"mimi-=		29	+ 3 * 3", 
 				" 		foo	-= mimi + 3/3*3/2+3    /	3 + 3*3+3*3+3*2")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(foo=-52,mimi=-3)", memory.toString());
 	}
@@ -189,7 +190,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + 		9	* 2+20/3", 
 				"mimi*=		29	+ 3 * 3", 
 				" 		foo	*= mimi + 3/3*3/2+3    /	3 + 3*3+3*3+3*2")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(foo=2202144,mimi=1330)", memory.toString());
 	}
@@ -204,7 +205,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + 		9	* 2+20/3", 
 				"mimi /=		2	- 3 ", 
 				" 		foo	/= mimi + 34			")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(foo=-5,mimi=-35)", memory.toString());
 	}
@@ -219,7 +220,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + ++foo +		9	* 2+20/3", 
 				"mimi =		2	- 3 * ++mimi", 
 				" 		foo	*= ++mimi + ++  mimi + ++foo + 34			")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(foo=-59427,mimi=-383)", memory.toString());
 	}
@@ -234,7 +235,7 @@ public class CalculatorTest {
 				"	mimi	=	11 + foo++ +		9	* 2+20/3", 
 				"mimi =		2	- 3 * mimi++", 
 				" 		foo	*= mimi++ +   mimi++ + foo++ + 34			")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(foo=-56420,mimi=-371)", memory.toString());
 	}
@@ -250,7 +251,7 @@ public class CalculatorTest {
 				"	d2	=	11 + kip_i2-- +		9 -li112_s--	* 2+20/3", 
 				"d2 =		2	- 3 * d2--", 
 				" 		kip_i2	*= d2-- +   li112_s-- + li112_s-- + 34			")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(d2=-53,kip_i2=45,li112_s=0)", memory.toString());
 	}
@@ -266,7 +267,7 @@ public class CalculatorTest {
 				"	d2	=	11 + --kip_i2 +		9 - --li112_s	* 2+20/3", 
 				"d2 =		2	- 3 * --d2", 
 				" 		kip_i2	*= d2-- +   --li112_s + --li112_s + 34	")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(d2=-65,kip_i2=99,li112_s=-2)", memory.toString());
 	}
@@ -282,7 +283,7 @@ public class CalculatorTest {
 				"	d2	=	(11 + (--kip_i2)) *((		9 - --li112_s)	* (2+20)/3)", 
 				"d2 =		((2	- 3) * (--d2))", 
 				" 		kip_i2	*= (((d2--) +   (--li112_s))) * (((--li112_s)) + 34)	")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(d2=-1078,kip_i2=87200,li112_s=-14)", memory.toString());
 	}
@@ -299,7 +300,7 @@ public class CalculatorTest {
 				"d2 *=		((2	- 3) * (++d2))", 
 				"	d2	/=	100 / (2+2) * 3", 
 				" 		kip_i2	*= (((d2++) +   (li112_s++))) * (((++li112_s)) + 34)	")
-				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+				.forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(d2=-10056,kip_i2=1167424,li112_s=-5)", memory.toString());
 	}
@@ -316,7 +317,7 @@ public class CalculatorTest {
 
 		// Test variable length
 		try {
-			Stream.of("	L234567890_234567890_234567890a = 2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	L234567890_234567890_234567890a = 2 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(7)));
@@ -324,7 +325,7 @@ public class CalculatorTest {
 
 		// Test variable invalid char
 		try {
-			Stream.of("	L2@ = 2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	L2@ = 2 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(7)));
@@ -332,7 +333,7 @@ public class CalculatorTest {
 		
 		// Test variable starts with a number
 		try {
-			Stream.of("	2 = 2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	2 = 2 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(7)));
@@ -347,7 +348,7 @@ public class CalculatorTest {
 		
 		// Test undefined variable in assignment operator 
 		try {
-			Stream.of("	i += 2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i += 2 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(11)));
@@ -355,7 +356,7 @@ public class CalculatorTest {
 		
 		// Test undefined variable in numeric expression 
 		try {
-			Stream.of("	i = i ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = i ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(3)));
@@ -363,7 +364,7 @@ public class CalculatorTest {
 
 		// Test undefined variable in unary increment 
 		try {
-			Stream.of("	j = ++i ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	j = ++i ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(3)));
@@ -377,7 +378,7 @@ public class CalculatorTest {
 		
 		// Missing left parenthesis
 		try {
-			Stream.of("	i = (2)) ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = (2)) ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(13)));
@@ -385,7 +386,7 @@ public class CalculatorTest {
 		
 		// Missing left parenthesis
 		try {
-			Stream.of("	i = 2)) ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = 2)) ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(13)));
@@ -393,7 +394,7 @@ public class CalculatorTest {
 
 		// Missing left parenthesis
 		try {
-			Stream.of("	i  = (2) / (1+2)) ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i  = (2) / (1+2)) ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(13)));
@@ -401,7 +402,7 @@ public class CalculatorTest {
 
 		// Missing right parenthesis
 		try {
-			Stream.of("	i = (1 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = (1 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(5)));
@@ -409,7 +410,7 @@ public class CalculatorTest {
 		
 		// Missing right parenthesis
 		try {
-			Stream.of("	i = (1) + (2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = (1) + (2 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(5)));
@@ -424,7 +425,7 @@ public class CalculatorTest {
 		
 		// Test undefined variable in assignment operator 
 		try {
-			Stream.of("	i += 2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i += 2 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(11)));
@@ -432,7 +433,7 @@ public class CalculatorTest {
 		
 		// Test undefined variable in numeric expression 
 		try {
-			Stream.of("	i = i ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = i ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(3)));
@@ -447,7 +448,7 @@ public class CalculatorTest {
 		
 		// Missing math expression before the end of the line 
 		try {
-			Stream.of("	i =  ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i =  ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(8)));
@@ -456,7 +457,7 @@ public class CalculatorTest {
 		
 		// Missing math expression at the end of the line 
 		try {
-			Stream.of("	i =").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i =").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(10)));
@@ -470,7 +471,7 @@ public class CalculatorTest {
 		Calculator calc = new Calculator(memory);
 		
 		try {
-			Stream.of("	i =  @").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i =  @").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(9)));
@@ -485,7 +486,7 @@ public class CalculatorTest {
 		
 		// Missing assignment sign
 		try {
-			Stream.of("	i   1").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i   1").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(8)));
@@ -493,7 +494,7 @@ public class CalculatorTest {
 
 		// Missing variable name
 		try {
-			Stream.of("	=").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	=").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch(StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(7)));
@@ -508,7 +509,7 @@ public class CalculatorTest {
 		
 	    thrown.expect( StatementException.class );
 	    thrown.expectMessage(StatementException.makeErrCode(2));
-		Stream.of("	i  = 3+").forEach(strStmt -> calc.evalStmtStr(strStmt));
+		Stream.of("	i  = 3+").forEach(strStmt -> calc.evaluate(strStmt));
 	}
 
 	
@@ -519,7 +520,7 @@ public class CalculatorTest {
 		
 	    thrown.expect( StatementException.class );
 	    thrown.expectMessage(StatementException.makeErrCode(12));
-		Stream.of("	i  = 3 2").forEach(strStmt -> calc.evalStmtStr(strStmt));
+		Stream.of("	i  = 3 2").forEach(strStmt -> calc.evaluate(strStmt));
 	}
 
 	@Test
@@ -528,20 +529,20 @@ public class CalculatorTest {
 		Calculator calc = new Calculator(memory);
 		// Test unsupported binary operator
 
-		MockUp<TokenUtil> tokenUtilMock = null;
+		MockUp<Token> tokenMock = null;
 		try {
-			tokenUtilMock = new MockUp<TokenUtil>() {
+			tokenMock = new MockUp<Token>() {
 				@Mock
 				private EvalAction getEvaluationAction(Invocation invocation, TokenType tokenType, EvalAction incAction, EvalAction decAction) {
 					return invocation.proceed(TokenType.LEFT_PAREN, incAction, decAction);
 				}
 			};
 
-			Stream.of("	i = 0 ", "	j = ++i ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	i = 0 ", "	j = ++i ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
-		} catch (IllegalArgumentException se) { // Do 
+		} catch (IllegalArgumentException se) { // Do nothing
 		} finally {
-			tokenUtilMock.tearDown();
+			tokenMock.tearDown();
 		}
 
 	}
@@ -561,7 +562,7 @@ public class CalculatorTest {
 				}
 			};
 
-			Stream.of("	j = 1+1 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	j = 1+1 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch (StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(4)));
@@ -586,7 +587,7 @@ public class CalculatorTest {
 				}
 			};
 
-			Stream.of("	j = 1+1 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+			Stream.of("	j = 1+1 ").forEach(strStmt -> calc.evaluate(strStmt));
 			fail("Should not reach this point");
 		} catch (StatementException se) {
 			assertTrue(se.getMessage(), se.getMessage().contains(StatementException.makeErrCode(1)));
@@ -605,7 +606,7 @@ public class CalculatorTest {
 
 	    thrown.expect( StatementException.class );
 	    thrown.expectMessage(StatementException.makeErrCode(7));
-		Stream.of("	L234567890_234567890_234567890a = 2 ").forEach(strStmt -> calc.evalStmtStr(strStmt));
+		Stream.of("	L234567890_234567890_234567890a = 2 ").forEach(strStmt -> calc.evaluate(strStmt));
 	}
 
 	@Ignore("Not implemented yet")
@@ -631,7 +632,7 @@ public class CalculatorTest {
 				" L234567890_234567890_234567890 = 		i_1_2_0_2_3_4_6_7_8_9_4_	",
 				"a2_2 =	 aB + AB",
 				"	a2_2 +=	 a "
-				).forEach(strStmt -> calc.evalStmtStr(strStmt));
+				).forEach(strStmt -> calc.evaluate(strStmt));
 
 		assertEquals("memory", "(AB=7,Ab=3,L234567890_234567890_234567890=1,a=1,a2_2=13,aB=5,ab=1,i1=1,i_1_2_0_2_3_4_6_7_8_9_4_=1,i_____=1)", memory.toString());
 	}

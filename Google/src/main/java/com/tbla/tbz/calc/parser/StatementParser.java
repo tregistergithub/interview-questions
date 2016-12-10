@@ -5,6 +5,13 @@ import java.util.Queue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Handles the statement parsing, separates the variable and the math expression
+ * 
+ * In addition handles assignment math operations (such as +=, -=, *=, /= etc.)
+ *
+ * Uses ExpressionTokenizer to tokenize the math expression
+ */
 public class StatementParser {
 
 	enum AssignmentOperators {

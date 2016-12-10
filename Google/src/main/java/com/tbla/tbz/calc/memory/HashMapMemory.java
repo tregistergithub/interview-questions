@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+/**
+ * Implementation of calculator Memory using a hash map
+ *
+ */
 public class HashMapMemory implements Memory {
 	private Map<String, Integer> memory = new TreeMap<>();
 

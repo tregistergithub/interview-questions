@@ -13,6 +13,43 @@ import com.tbla.tbz.calc.parser.StatementParser;
 import com.tbla.tbz.calc.parser.Token;
 import com.tbla.tbz.calc.parser.TokenType;
 
+/**
+ * <p/>
+ * ******************************************************************
+ * <p/>
+ *  IMPORTANT: <b>NOT THREAD SAFE</b>
+ * <p/>
+ * ******************************************************************
+ * <p/>
+ * <b>Question 1</b>
+ * <p/>
+ * Objective : Implement a text based calculator application. Usage of Rhino,
+ * Nashorn and other similar solutions is not allowed.
+ * <p/>
+ * Input : The input is a series of assignment expressions. The syntax is a
+ * subset of Java numeric expressions and operators.
+ * <p/>
+ * Output : At the end of evaluating the series, the value of each variable is
+ * printed out.
+ * 
+ * @author Tal Bar-Zvi
+ *
+ * 
+ * ******************************************************************
+ * <p/>
+ *  IMPORTANT: <b>NOT THREAD SAFE</b>
+ * <p/>
+ * ******************************************************************
+ * <p/>
+ *
+ * Note 1: Supports integers only (double not supported)
+ * <p/>
+ * Note 2: Does not support unary minus operator 
+ * <p/>
+ * Note 3: Does not support excessive plus operators like 1 + + 1 
+ * <p/>
+ *
+ **/
 public class Calculator {
 
 	private static final int REQUIRED_ARGUMENT_COUNT = 2;
@@ -20,20 +57,68 @@ public class Calculator {
 	private static final int SINGLE_FINAL_RESULT = 1;
 	private final Memory memory;
 
+	/**
+	 * Creates a calculator for evaluation of java-like math expressions and variables
+	 * 
+	 * Note 1: Supports integers only (double not supported)
+	 * <p/>
+	 * Note 2: Does not support unary minus operator 
+	 * <p/>
+	 * Note 3: Does not support excessive plus operators like 1 + + 1 
+	 * <p/>
+	 * 
+	 * @param memory <b>MANDATORY</b> - the memory unit for the calculator
+	 */
 	public Calculator(Memory memory) {
+		if (memory == null) throw new RuntimeException("Memory must be not null");
 		this.memory = memory;
 	}
 
-	public void evalStmtStr(String strStmt)  {
-		StatementParser parsedStmt = new StatementParser(strStmt);
-		Queue<Token> postfixTokenQueue = parsedStmt.generatePostfixTokenQueue();
-		Integer savedValue = memory.get(parsedStmt.getVariableName());
-		Token resultToken = evaluatePostfixExpression(postfixTokenQueue);
-		resultToken = handleMathAssignmentOperator(parsedStmt.getVariableName(), savedValue, parsedStmt.getAssignmentTokenType(), resultToken);
-		log.debug("===================> {} = {}", parsedStmt.getVariableName(), resultToken);
-		memory.set(parsedStmt.getVariableName(), getValueAndEval(resultToken));
+	/**
+	 * Evaluates a string statement, updates the memory with the results
+	 * 
+	 * This is the main algorithm flow 
+	 * 
+	 * @param strStmt <b>MANDATORY</b> the statement to evaluate into memory
+	 */
+	public void evaluate(String strStmt)  {
+		try {
+			// First divide the variable from the math statement
+			StatementParser parsedStmt = new StatementParser(strStmt);
+
+			// Get the math expression in post-fix notation
+			Queue<Token> postfixTokenQueue = parsedStmt.generatePostfixTokenQueue();
+
+			// Save the variable value for later in case of math assignment operator (such as +=, -=, *=, /=, etc) 
+			Integer savedValue = memory.get(parsedStmt.getVariableName());
+
+			Token resultToken = evaluatePostfixExpression(postfixTokenQueue);
+
+			// In case of math assignment operator (such as +=, -=, *=, /=, etc) - perform the operation and update memory
+			resultToken = handleMathAssignmentOperator(parsedStmt.getVariableName(), savedValue,
+					parsedStmt.getAssignmentTokenType(), resultToken);
+			
+			log.debug("===================> {} = {}", parsedStmt.getVariableName(), resultToken);
+			
+			// Set the result to memory
+			memory.set(parsedStmt.getVariableName(), getValueAndEval(resultToken));
+			
+		} catch (Exception e) {
+			log.error("Exception during evaluation of statement" + strStmt);
+			throw e;
+		}
 	}
 
+	/**
+	 * Evaluates the post-fix expression
+	 * 
+	 * Uses Postfix algorithm
+	 * 
+	 * See also: Reverse Polish Notation
+	 * 
+	 * https://en.wikipedia.org/wiki/Reverse_Polish_notation
+	 *  
+	 */
 	private Token evaluatePostfixExpression(Queue<Token> postfixTokenQueue)  {
 		Stack<Token> evaluationStack = new Stack<>();
 
@@ -85,6 +170,15 @@ public class Calculator {
 		}
 	}
 
+	/**
+	 * Evaluates an operand to its integer value 
+	 * 
+	 * For a number - returns its value
+	 * For a variable - gets its value from memory
+	 * In case a variable has a unary operator assigned (such as ++, --)
+	 * Performs the operation and updates memory 
+	 *  
+	 */
 	private int getValueAndEval(Token token) {
 		if (token.getTokenType() == TokenType.INTEGER) {
 			return Integer.valueOf(token.getTokenStr());
@@ -110,6 +204,12 @@ public class Calculator {
 		}
 	}
 
+	/**
+	 * Handles the variable unary operators (such as ++i, i++, --i, i--)
+	 * 
+	 * Returns the value and updates the variable in memory accordingly
+	 * 
+	 */
 	private Integer evalUnary(Token token, String variableName, Integer value) {
 		switch (token.getEvaluationAction()) {
 		case PRE_INC:
@@ -129,14 +229,17 @@ public class Calculator {
 			break;
 
 		default:
-			break;
+			throw new IllegalArgumentException("Unsupported evaluation action " + token.getEvaluationAction());
 		}
 		return value;
 	}
 
+	/**
+	 * Performs the assignment operator using a post-fix expression  
+	 * 
+	 */
 	private Token handleMathAssignmentOperator(String variableName, Integer savedValue, Token assignmentOperation, Token expressionResult) {
 		Queue<Token> postfixTokenQueue = new LinkedList<>();
-		
 
 		if (assignmentOperation != null) {
 			if (savedValue == null) {
@@ -151,5 +254,4 @@ public class Calculator {
 
 		return expressionResult;
 	}
-
 }

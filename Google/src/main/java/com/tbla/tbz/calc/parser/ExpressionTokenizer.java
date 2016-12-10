@@ -9,6 +9,14 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Parses a math expression and returns it in a post-fix notation
+ * 
+ * See also:  Shunting-yard algorithm ( Edsger Dijkstra ) in Wikipedia
+ *
+ * https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+ *
+ */
 public class ExpressionTokenizer {
 
 	private static List<TokenParsingInfo> tokenParsingInfoList = new ArrayList<>();
@@ -28,6 +36,10 @@ public class ExpressionTokenizer {
 		addTokenInfo(REGEXP_VARIABLE, TokenType.VARIABLE);
 	}
 
+	private static Pattern compilePattern(String regex) {
+		return Pattern.compile("^(\\s*" + regex + "\\s*)");
+	} 
+	
 	private static void addTokenInfo(String innerRegExp, TokenType tokenType) {
 		tokenParsingInfoList.add(new TokenParsingInfo(compilePattern(innerRegExp), tokenType));
 	}
@@ -36,25 +48,20 @@ public class ExpressionTokenizer {
 		return compilePattern(REGEXP_VARIABLE+"$").matcher(s).find();
 	}
 
-	private static Pattern compilePattern(String regex) {
-		return Pattern.compile("^(\\s*" + regex + "\\s*)");
-	}
-
-	private final List<Token> tokenList = new ArrayList<>();
 	private final String mathExpression;
 
 	public ExpressionTokenizer(String mathExpression) {
+		if (mathExpression == null) throw new RuntimeException("mathExpression must be non-null");
 		this.mathExpression = mathExpression;
 	}
 
 	public Queue<Token> getPostfixTokenQueue()  {
-		tokenize(mathExpression);
-		return infixToPostfix();
+		return infixToPostfix(tokenize(mathExpression));
 	}
 
-	private void tokenize(String str)  {
+	private List<Token> tokenize(String str)  {
+		List<Token> tokenList = new ArrayList<>();
 		String s = str.trim();
-		tokenList.clear();
 		while (!s.equals("")) {
 			boolean match = false;
 			for (TokenParsingInfo parsingInfo : tokenParsingInfoList) {
@@ -72,48 +79,66 @@ public class ExpressionTokenizer {
 				throw new StatementException(9, "Unexpected character in mathematical expression " + s);
 			}
 		}
+		return tokenList;
 	}
 
-	private Queue<Token> infixToPostfix()  {
+	/**
+	 * Converts infix to post-fix with Shunting-yard algorithm
+	 * 
+	 * In addition, handles variables with pre/post increment/decrement opeations
+	 */
+	private Queue<Token> infixToPostfix(List<Token> tokenList)  {
 		Deque<Token> outputQueue = new LinkedList<>();
 		Stack<Token> operatorStack = new Stack<>();
 
 		for (Token currentToken : tokenList) {
 
+			// If its an operand (variable / literal) - put in output
 			if (currentToken.getTokenType().isOperand()) {
 
 				if (currentToken.getTokenType() == TokenType.VARIABLE) {
-					if (!operatorStack.isEmpty() && TokenUtil.isIncDecOperator(operatorStack.peek())) {
+
+					// Handle variables with pre/post increment/decrement operations
+					if (!operatorStack.isEmpty() && operatorStack.peek().isIncDecOperator()) {
 						Token incDecOp = operatorStack.pop();
-						currentToken = new Token(currentToken.getTokenStr(), TokenType.VARIABLE_WITH_EVAL_ACTION, TokenUtil.getPreEvalAction(incDecOp.getTokenType()));
+						currentToken = new Token(currentToken.getTokenStr(), TokenType.VARIABLE_WITH_EVAL_ACTION, Token.getPreEvalAction(incDecOp.getTokenType()));
 					}
 				}
 
 				outputQueue.add(currentToken);
 
-			} else if (TokenUtil.isIncDecOperator(currentToken)) {
-				if (!outputQueue.isEmpty() && TokenUtil.isVariable(outputQueue.peekLast())) {
+			} else if (currentToken.isIncDecOperator()) {
+
+				// Handle variables with pre/post increment/decrement operations
+				if (!outputQueue.isEmpty() && outputQueue.peekLast().isVariable()) {
 					Token previousToken = outputQueue.pollLast();
-					Token newToken = new Token(previousToken.getTokenStr(), TokenType.VARIABLE_WITH_EVAL_ACTION, TokenUtil.getPostEvalAction(currentToken.getTokenType()) );
+					Token newToken = new Token(previousToken.getTokenStr(), TokenType.VARIABLE_WITH_EVAL_ACTION, Token.getPostEvalAction(currentToken.getTokenType()) );
 					outputQueue.add(newToken);
-				} else {
+					
+				} else { // Insert the operator to it can be picked by the algorithm to assign it to the closest variable  
 					operatorStack.add(currentToken);
 				}
 
+			// Handle binary operators (+, -, *, / , etc.)
 			} else if (currentToken.getTokenType().isBinaryOperator()) {
 
-				while (!operatorStack.isEmpty() && !TokenUtil.isParenthesis(operatorStack.peek()) 
+				while (!operatorStack.isEmpty() && !operatorStack.peek().isParenthesis() 
 						&& currentToken.getTokenType().getPrecendence() <= operatorStack.peek().getTokenType().getPrecendence()) {
-					outputQueue.add(operatorStack.pop());
+					// put in output all of the higher/same precendence operator
+					// Need to add in the future : association handling and unary operator handling
+					outputQueue.add(operatorStack.pop()); 
+					
 				}
 
-				operatorStack.push(currentToken);
+				operatorStack.push(currentToken); 
 
+			// left parenthesis - treat it like it is the begging of the statement
 			} else if (currentToken.getTokenType() == TokenType.LEFT_PAREN) {
 				operatorStack.push(currentToken);
 
-			} else if (TokenUtil.isRightParen(currentToken)) {
-				while (!operatorStack.isEmpty() && !TokenUtil.isLeftParen(operatorStack.peek())) {
+			// right parenthesis - pop all until the left parenthesis (treat it like it is the end of the statement) 
+			} else if (currentToken.isRightParen()) {
+				while (!operatorStack.isEmpty() && !operatorStack.peek().isLeftParen()) {
 					outputQueue.add(operatorStack.pop());
 				}
 				if (!operatorStack.isEmpty()) {
@@ -125,8 +150,8 @@ public class ExpressionTokenizer {
 		}
 
 		while (!operatorStack.isEmpty()) {
-			if (!operatorStack.isEmpty() && !TokenUtil.isParenthesis(operatorStack.peek())) {
-				outputQueue.add(operatorStack.pop());
+			if (!operatorStack.isEmpty() && !operatorStack.peek().isParenthesis()) {
+				outputQueue.add(operatorStack.pop()); // pop all of the remaining operators 
 			} else {
 				throw new StatementException(5, "Parenthesis balancing error 2"); // Missing right parenthesis at end
 			}
@@ -135,6 +160,10 @@ public class ExpressionTokenizer {
 		return outputQueue;
 	}
 
+	/**
+	 * Helper class to contain the token parsing info
+	 *
+	 */
 	private static class TokenParsingInfo {
 
 		public final Pattern regex;
@@ -147,7 +176,7 @@ public class ExpressionTokenizer {
 
 		@Override
 		public String toString() {
-			return "TokenInfo [regex=" + regex + ", tokenType=" + tokenType + "]";
+			return "regex=" + regex + ", tokenType=" + tokenType + "]";
 		}
 	}
 }

@@ -1,5 +1,9 @@
 package com.tbla.tbz.calc.parser;
 
+/**
+ * All the token type thes  
+ *
+ */
 public enum TokenType {
 	
 	DIV_OPERATOR("/", 8, true, true), 

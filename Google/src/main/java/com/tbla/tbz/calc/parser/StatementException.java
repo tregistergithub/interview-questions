@@ -1,5 +1,9 @@
 package com.tbla.tbz.calc.parser;
 
+/**
+ * Statement expression related exception, mainly parsing issues
+ *
+ */
 public class StatementException extends RuntimeException {
 
 	private static final long serialVersionUID = 4157889010662739773L;
