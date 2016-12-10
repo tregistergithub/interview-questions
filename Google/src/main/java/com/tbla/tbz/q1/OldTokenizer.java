@@ -9,7 +9,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Tokenizer {
+public class OldTokenizer {
 
 	public static final int PRE_INCREMEMNT = 1;
 	public static final int POST_INCREMENT = 2;
@@ -24,8 +24,6 @@ public class Tokenizer {
 	private static final int RIGHT_PAREN = 6;
 	private static final int INCREMENT_OPERATOR = 10;
 	private static final int DECREMENT_OPERATOR = 20;
-	private static final int POST = 1;
-	private static final int PRE = 2;
 	private List<TokenInfo> tokenInfos = new ArrayList<TokenInfo>();
 
 	private void addTokenInfo(String regex, int token) {
@@ -107,7 +105,7 @@ public class Tokenizer {
 		        case ")":
 		            return 1;
 		        default: 
-		            throw new ParserException("Unsupported operator " + strToken );
+		            throw new OldParserException("Unsupported operator " + strToken );
 		    }
 		}
 
@@ -172,7 +170,6 @@ public class Tokenizer {
 						}
 					}
 					
-					// TODO if isVariable and it is undefined - throw exception here
 					outputQueue.add(currentToken);
 					
 				} else if (currentToken.isIncrementOrDecrementOperator()) {
@@ -190,7 +187,6 @@ public class Tokenizer {
 							&& currentToken.getPrecedence() <= operatorStack.peek().getPrecedence()) {
 						outputQueue.add(operatorStack.pop());
 					}
-		
 
 					operatorStack.push(currentToken);
 		
@@ -200,7 +196,7 @@ public class Tokenizer {
 				} else if (currentToken.isRightParen()) {
 					while (!operatorStack.peek().isLeftParen()) {
 						if (operatorStack.isEmpty()) {
-							throw new ParserException("Parenthesis balancing error");
+							throw new OldParserException("Parenthesis balancing error");
 						}
 		
 						outputQueue.add(operatorStack.pop());
@@ -213,7 +209,7 @@ public class Tokenizer {
 				if (!operatorStack.isEmpty() && !operatorStack.peek().isParenthesis())
 					outputQueue.add(operatorStack.pop());
 				else
-					throw new ParserException("Parenthesis balancing error");
+					throw new OldParserException("Parenthesis balancing error");
 			}
 		
 			return outputQueue;
@@ -240,7 +236,7 @@ public class Tokenizer {
 
 	private final List<Token> tokens = new ArrayList<Token>();
 
-	public Tokenizer(String s) {
+	public OldTokenizer(String s) {
 		addTokenInfo("\\(", LEFT_PAREN);
 		addTokenInfo("\\)", RIGHT_PAREN);
 		addTokenInfo("\\+\\+", INCREMENT_OPERATOR);
@@ -268,7 +264,7 @@ public class Tokenizer {
 				}
 			}
 			if (!match) {
-				throw new ParserException("Unexpected character in mathematical expression " + s);
+				throw new OldParserException("Unexpected character in mathematical expression " + s);
 			}
 		}
 	}

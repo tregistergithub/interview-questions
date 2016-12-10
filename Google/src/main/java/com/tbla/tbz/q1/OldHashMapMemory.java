@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 // TODO add interface
-public class HashMapMemory implements Memory {
+public class OldHashMapMemory implements OldMemory {
 	private Map<String, Integer> memory = new TreeMap<>();
 
 	@Override
