@@ -128,10 +128,10 @@ public class OldCalculator {
 					variableName = inputLine.substring(0, indexOfAssignmentOperator).trim();
 
 				} else {
-					throw new OldParserException("Missing assignment operator in the input line " + inputLine);
+					throw new OldParserException2("Missing assignment operator in the input line " + inputLine);
 				}
 				if (!Token.isVariableName(variableName)) {
-					throw new OldParserException("Invalid variable name " + variableName);
+					throw new OldParserException2("Invalid variable name " + variableName);
 				}
 				if (isVerbose)
 					System.out.println(variableName);
@@ -139,7 +139,7 @@ public class OldCalculator {
 				if (indexOfAssignmentOperator + assignmentOperator.length() < inputLine.length()) {
 					mathExpression = inputLine.substring(indexOfAssignmentOperator + assignmentOperator.length()).trim();
 				} else {
-					throw new OldParserException("Missing mathematical expression in the input line " + inputLine);
+					throw new OldParserException2("Missing mathematical expression in the input line " + inputLine);
 				}
 				;
 				break;
@@ -148,7 +148,7 @@ public class OldCalculator {
 		}
 
 		if (mathExpression.isEmpty()) {
-			throw new OldParserException("Missing mathematical expression for variable " + variableName);
+			throw new OldParserException2("Missing mathematical expression for variable " + variableName);
 		}
 		
 		if (isVerbose)
@@ -199,7 +199,7 @@ public class OldCalculator {
 			} else if (currentToken.isOperator()) {
 				
 				if (evaluationStack.size() < NUMBER_OF_REQUIRED_OPERANDS_FOR_BINARY_OPERATION) {
-					throw new RuntimeException("Missin operand(s) for operator " + currentToken.strToken);
+					throw new OldParserException2("Missin operand(s) for operator " + currentToken.strToken);
 				}
 				Token operand1 = evaluationStack.pop();
 				Token operand2 = evaluationStack.pop();
@@ -211,7 +211,7 @@ public class OldCalculator {
 			}
 		}
 		if (evaluationStack.size() != SINGLE_FINAL_RESULT) {
-			throw new OldParserException("Missing operator in mathematical expression" );
+			throw new OldParserException2("Missing operator in mathematical expression" );
 		}
 		return evaluationStack.pop();
 	}
@@ -226,7 +226,7 @@ public class OldCalculator {
 			String variableName = token.strToken;
 			Integer value = memory.get(variableName);
 			if (value == null) {
-				throw new OldParserException("Undifined variable " + variableName);
+				throw new OldParserException2("Undifined variable " + variableName);
 			} else {
 				if (token.specialInstructions == OldTokenizer.PRE_INCREMEMNT) {
 					if (isVerbose) System.out.println("Pre INC rementing variable <" + variableName + ">");
@@ -254,7 +254,7 @@ public class OldCalculator {
 			}
 
 		} else {
-			throw new OldParserException("Unsupported operand token " + token);
+			throw new OldParserException2("Unsupported operand token " + token);
 		}
 	}
 
@@ -269,7 +269,7 @@ public class OldCalculator {
 		case "/":
 			return buildNumberToken(operand2 / operand1);
 		default:
-			throw new OldParserException("Unsupported operator " + operator);
+			throw new OldParserException2("Unsupported operator " + operator);
 		}
 	}
 

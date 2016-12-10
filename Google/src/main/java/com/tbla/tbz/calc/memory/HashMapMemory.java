@@ -39,6 +39,8 @@ public class HashMapMemory implements Memory {
 
 	@Override
 	public void set(String variableName, Integer value) {
+		if (variableName == null) throw new RuntimeException( "Variable name must be non-null" );
+		if (value == null) throw new RuntimeException( "Value name must be non-null" );
 		memory.put(variableName, value);		
 	}
 }

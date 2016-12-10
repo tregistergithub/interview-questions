@@ -105,7 +105,7 @@ public class OldTokenizer {
 		        case ")":
 		            return 1;
 		        default: 
-		            throw new OldParserException("Unsupported operator " + strToken );
+		            throw new OldParserException2("Unsupported operator " + strToken );
 		    }
 		}
 
@@ -196,7 +196,7 @@ public class OldTokenizer {
 				} else if (currentToken.isRightParen()) {
 					while (!operatorStack.peek().isLeftParen()) {
 						if (operatorStack.isEmpty()) {
-							throw new OldParserException("Parenthesis balancing error");
+							throw new OldParserException2("Parenthesis balancing error");
 						}
 		
 						outputQueue.add(operatorStack.pop());
@@ -209,7 +209,7 @@ public class OldTokenizer {
 				if (!operatorStack.isEmpty() && !operatorStack.peek().isParenthesis())
 					outputQueue.add(operatorStack.pop());
 				else
-					throw new OldParserException("Parenthesis balancing error");
+					throw new OldParserException2("Parenthesis balancing error");
 			}
 		
 			return outputQueue;
@@ -264,7 +264,7 @@ public class OldTokenizer {
 				}
 			}
 			if (!match) {
-				throw new OldParserException("Unexpected character in mathematical expression " + s);
+				throw new OldParserException2("Unexpected character in mathematical expression " + s);
 			}
 		}
 	}

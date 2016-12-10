@@ -24,7 +24,7 @@ public class Calculator {
 		this.memory = memory;
 	}
 
-	public void evalStmtStr(String strStmt) throws StatementException {
+	public void evalStmtStr(String strStmt)  {
 		StatementParser parsedStmt = new StatementParser(strStmt);
 		Queue<Token> postfixTokenQueue = parsedStmt.generatePostfixTokenQueue();
 		Integer savedValue = memory.get(parsedStmt.getVariableName());
@@ -34,7 +34,7 @@ public class Calculator {
 		memory.set(parsedStmt.getVariableName(), getValueAndEval(resultToken));
 	}
 
-	private Token evaluatePostfixExpression(Queue<Token> postfixTokenQueue) throws StatementException {
+	private Token evaluatePostfixExpression(Queue<Token> postfixTokenQueue)  {
 		Stack<Token> evaluationStack = new Stack<>();
 
 		while (!postfixTokenQueue.isEmpty()) {
@@ -46,7 +46,7 @@ public class Calculator {
 			} else if (currentToken.getTokenType().isOperator()) {
 
 				if (evaluationStack.size() < REQUIRED_ARGUMENT_COUNT) {
-					throw new StatementException("Missin operand(s) for operator " + currentToken);
+					throw new StatementException(2,"Missin operand(s) for operator " + currentToken);
 				}
 
 				Token operand1 = evaluationStack.pop();
@@ -61,7 +61,7 @@ public class Calculator {
 			}
 		}
 		if (evaluationStack.size() != SINGLE_FINAL_RESULT) {
-			throw new StatementException("Missing operator in mathematical expression");
+			throw new StatementException(12, "Missing operator in mathematical expression");
 		}
 		return evaluationStack.pop();
 	}
@@ -81,7 +81,7 @@ public class Calculator {
 			return new Token(String.valueOf(int2 / int1), TokenType.INTEGER);
 
 		default:
-			throw new StatementException("Unsupported operator " + tokenType);
+			throw new StatementException(1, "Unsupported operator " + tokenType);
 		}
 	}
 
@@ -102,29 +102,29 @@ public class Calculator {
 
 				return value;
 			} else {
-				throw new StatementException("Undifined variable " + variableName);
+				throw new StatementException(3, "Undifined variable " + variableName);
 			}
 
 		} else {
-			throw new StatementException("Unsupported operand token " + token);
+			throw new StatementException(4, "Unsupported operand token " + token);
 		}
 	}
 
 	private Integer evalUnary(Token token, String variableName, Integer value) {
 		switch (token.getEvaluationAction()) {
-		case PRE_INCREMENT:
+		case PRE_INC:
 			memory.set(variableName, ++value);
 			break;
 
-		case PRE_DECREMENT:
+		case PRE_DEC:
 			memory.set(variableName, --value);
 			break;
 
-		case POST_INCREMENT:
+		case POST_INC:
 			memory.set(variableName, value + 1);
 			break;
 
-		case POST_DECREMENT:
+		case POST_DEC:
 			memory.set(variableName, value - 1);
 			break;
 
@@ -134,14 +134,13 @@ public class Calculator {
 		return value;
 	}
 
-	private Token handleMathAssignmentOperator(String variableName, Integer savedValue, Token assignmentOperation, Token expressionResult)
-			throws StatementException {
+	private Token handleMathAssignmentOperator(String variableName, Integer savedValue, Token assignmentOperation, Token expressionResult) {
 		Queue<Token> postfixTokenQueue = new LinkedList<>();
 		
 
 		if (assignmentOperation != null) {
 			if (savedValue == null) {
-				throw new StatementException("Undifined variable" + variableName);
+				throw new StatementException(11, "Undefined variable" + variableName);
 			}
 
 			postfixTokenQueue.add(new Token(String.valueOf(savedValue), TokenType.INTEGER));

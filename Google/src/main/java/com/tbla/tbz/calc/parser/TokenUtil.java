@@ -3,7 +3,7 @@ package com.tbla.tbz.calc.parser;
 import com.tbla.tbz.calc.parser.Token.EvalAction;
 
 public class TokenUtil {
-
+	
 	public static boolean isIncDecOperator(Token currentToken) {
 		return currentToken.getTokenType() == TokenType.DECREMENT_OPERATOR
 				|| currentToken.getTokenType() == TokenType.INCREMENT_OPERATOR;
@@ -26,11 +26,11 @@ public class TokenUtil {
 	}
 
 	public static EvalAction getPostEvalAction(TokenType tokenType) {
-		return getEvaluationAction(tokenType, EvalAction.POST_INCREMENT, EvalAction.POST_DECREMENT);
+		return getEvaluationAction(tokenType, EvalAction.POST_INC, EvalAction.POST_DEC);
 	}
 
 	public static EvalAction getPreEvalAction(TokenType tokenType) {
-		return getEvaluationAction(tokenType, EvalAction.PRE_INCREMENT, EvalAction.PRE_DECREMENT);
+		return getEvaluationAction(tokenType, EvalAction.PRE_INC, EvalAction.PRE_DEC);
 	}
 
 	private static EvalAction getEvaluationAction(TokenType tokenType, EvalAction incAction, EvalAction decAction) {

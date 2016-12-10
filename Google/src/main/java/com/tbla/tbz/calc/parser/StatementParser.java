@@ -5,8 +5,6 @@ import java.util.Queue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.tbla.tbz.q1.OldParserException;
-
 public class StatementParser {
 
 	enum AssignmentOperators {
@@ -16,11 +14,11 @@ public class StatementParser {
 		DIV_EQUALS("/=", TokenType.DIV_OPERATOR),
 		EQUALS("=", null);
 		
-		private final TokenType tokenType;
+		private final TokenType mathOperator;
 		private final String strValue;
 		
-		AssignmentOperators(String strValue, TokenType tokenType) {
-			this.tokenType = tokenType;
+		AssignmentOperators(String strValue, TokenType mathOperator) {
+			this.mathOperator = mathOperator;
 			this.strValue = strValue;
 		}
 
@@ -28,8 +26,8 @@ public class StatementParser {
 			return strValue;
 		}
 
-		public TokenType getTokenType() {
-			return tokenType;
+		public TokenType getMathOperator() {
+			return mathOperator;
 		}
 	}
 	
@@ -40,7 +38,7 @@ public class StatementParser {
 	private String variableName;
 	private Token assignmentOperationToken;
 	
-	public StatementParser(String stmtStr) throws StatementException {
+	public StatementParser(String stmtStr)  {
 		parse(stmtStr);
 	}
 
@@ -49,35 +47,28 @@ public class StatementParser {
 		return variableName + " " + (assignmentOperationToken != null ? assignmentOperationToken : "") + "= " + mathExpression;
 	}
 
-	private void parse(String stmtStr) throws StatementException {
+	private void parse(String stmtStr)  {
 		for (AssignmentOperators assignment : AssignmentOperators.values()) {
 			int indexOfAssignmentOperator = stmtStr.indexOf(assignment.getStrValue());
 			
 			if (indexOfAssignmentOperator != ASSIGNMENT_OPERATOR_NOT_FOUND) {
 				
-				if (assignment.getTokenType() != null) {
-					assignmentOperationToken = new Token(assignment.getTokenType().getOperatorString(), assignment.getTokenType());
+				if (assignment.getMathOperator() != null) {
+					assignmentOperationToken = new Token(assignment.getMathOperator().asString(), assignment.getMathOperator());
 				}
 
 				log.debug("Assignment operator is {}", assignment.getStrValue());
 				
-				if (indexOfAssignmentOperator != ASSIGNMENT_OPERATOR_NOT_FOUND) {
-					variableName = stmtStr.substring(0, indexOfAssignmentOperator).trim();
+				variableName = stmtStr.substring(0, indexOfAssignmentOperator).trim();
 
-				} else {
-					throw new StatementException("Missing assignment operator in the input line " + stmtStr);
-				}
-				
 				if (!ExpressionTokenizer.isVariableName(variableName)) {
-					throw new StatementException("Invalid variable name " + variableName);
+					throw new StatementException(7, "Invalid variable name " + variableName);
 				}
 				
-				log.debug("Variable name is {}", variableName);
-
 				if (indexOfAssignmentOperator + assignment.getStrValue().length() < stmtStr.length()) {
 					mathExpression = stmtStr.substring(indexOfAssignmentOperator + assignment.getStrValue().length()).trim();
 				} else {
-					throw new OldParserException("Missing mathematical expression in the input line " + stmtStr);
+					throw new StatementException(10, "Missing mathematical expression in the input line " + stmtStr);
 				}
 				log.debug("Math expression is {}", mathExpression);
 				
@@ -85,18 +76,18 @@ public class StatementParser {
 			}
 		}
 
-		if (mathExpression.isEmpty()) {
-			throw new StatementException("Missing mathematical expression for variable " + variableName);
+		if (mathExpression == null || mathExpression.isEmpty()) {
+			throw new StatementException(8, "Missing mathematical expression for variable ");
 		}
 		
-		log.debug(mathExpression);
+		log.debug("Variable name is {}", variableName);
 	}
 
 	public String getVariableName() {
 		return variableName;
 	}
 
-	public Queue<Token> generatePostfixTokenQueue() throws StatementException {
+	public Queue<Token> generatePostfixTokenQueue()  {
 		return new ExpressionTokenizer(mathExpression).getPostfixTokenQueue();
 	}
 

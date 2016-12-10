@@ -3,7 +3,7 @@ package com.tbla.tbz.calc.parser;
 public class Token {
 	
 	public enum EvalAction {
-		PRE_INCREMENT, PRE_DECREMENT, POST_DECREMENT, POST_INCREMENT;
+		PRE_INC, PRE_DEC, POST_DEC, POST_INC;
 	}
 
 	private final String tokenStr;

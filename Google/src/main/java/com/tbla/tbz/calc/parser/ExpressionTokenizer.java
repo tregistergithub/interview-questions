@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class ExpressionTokenizer {
 
 	private static List<TokenParsingInfo> tokenParsingInfoList = new ArrayList<>();
-	private static final String REGEXP_VARIABLE = "[a-zA-Z][a-zA-Z0-9_]*";
+	private static final String REGEXP_VARIABLE = "[a-zA-Z][a-zA-Z0-9_]{0,29}";
 
 	static {
 		addTokenInfo("\\(", TokenType.LEFT_PAREN);
@@ -33,7 +33,7 @@ public class ExpressionTokenizer {
 	}
 
 	public static boolean isVariableName(String s) {
-		return compilePattern(REGEXP_VARIABLE).matcher(s).find();
+		return compilePattern(REGEXP_VARIABLE+"$").matcher(s).find();
 	}
 
 	private static Pattern compilePattern(String regex) {
@@ -47,12 +47,12 @@ public class ExpressionTokenizer {
 		this.mathExpression = mathExpression;
 	}
 
-	public Queue<Token> getPostfixTokenQueue() throws StatementException {
+	public Queue<Token> getPostfixTokenQueue()  {
 		tokenize(mathExpression);
 		return infixToPostfix();
 	}
 
-	private void tokenize(String str) throws StatementException {
+	private void tokenize(String str)  {
 		String s = str.trim();
 		tokenList.clear();
 		while (!s.equals("")) {
@@ -69,12 +69,12 @@ public class ExpressionTokenizer {
 				}
 			}
 			if (!match) {
-				throw new StatementException("Unexpected character in mathematical expression " + s);
+				throw new StatementException(9, "Unexpected character in mathematical expression " + s);
 			}
 		}
 	}
 
-	private Queue<Token> infixToPostfix() throws StatementException {
+	private Queue<Token> infixToPostfix()  {
 		Deque<Token> outputQueue = new LinkedList<>();
 		Stack<Token> operatorStack = new Stack<>();
 
@@ -113,14 +113,14 @@ public class ExpressionTokenizer {
 				operatorStack.push(currentToken);
 
 			} else if (TokenUtil.isRightParen(currentToken)) {
-				while (!TokenUtil.isLeftParen(operatorStack.peek())) {
-					if (operatorStack.isEmpty()) {
-						throw new StatementException("Parenthesis balancing error 1");
-					}
-
+				while (!operatorStack.isEmpty() && !TokenUtil.isLeftParen(operatorStack.peek())) {
 					outputQueue.add(operatorStack.pop());
 				}
-				operatorStack.pop();
+				if (!operatorStack.isEmpty()) {
+					operatorStack.pop(); // Discard left parenthesis
+				} else  {
+					throw new StatementException(13, "Parenthesis balancing error 1"); // Missing left parenthesis
+				}
 			}
 		}
 
@@ -128,7 +128,7 @@ public class ExpressionTokenizer {
 			if (!operatorStack.isEmpty() && !TokenUtil.isParenthesis(operatorStack.peek())) {
 				outputQueue.add(operatorStack.pop());
 			} else {
-				throw new StatementException("Parenthesis balancing error 2");
+				throw new StatementException(5, "Parenthesis balancing error 2"); // Missing right parenthesis at end
 			}
 		}
 

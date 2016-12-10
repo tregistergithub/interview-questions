@@ -26,7 +26,7 @@ public enum TokenType {
 		this.isBinaryOperator = isBinaryOperator; 
     }
 
-	public final String getOperatorString() {
+	public final String asString() {
 		return operatorString;
 	}
 
