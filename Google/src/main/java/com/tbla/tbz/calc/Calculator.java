@@ -113,13 +113,11 @@ public class Calculator {
 	private Integer evalUnary(Token token, String variableName, Integer value) {
 		switch (token.getEvaluationAction()) {
 		case PRE_INCREMENT:
-			++value;
-			memory.set(variableName, value);
+			memory.set(variableName, ++value);
 			break;
 
 		case PRE_DECREMENT:
-			--value;
-			memory.set(variableName, value);
+			memory.set(variableName, --value);
 			break;
 
 		case POST_INCREMENT:
