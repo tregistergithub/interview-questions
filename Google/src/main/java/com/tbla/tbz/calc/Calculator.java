@@ -27,9 +27,9 @@ public class Calculator {
 	public void evalStmtStr(String strStmt) throws StatementException {
 		StatementParser parsedStmt = new StatementParser(strStmt);
 		Queue<Token> postfixTokenQueue = parsedStmt.generatePostfixTokenQueue();
+		Integer savedValue = memory.get(parsedStmt.getVariableName());
 		Token resultToken = evaluatePostfixExpression(postfixTokenQueue);
-		resultToken = handleMathAssignmentOperator(parsedStmt.getVariableName(), parsedStmt.getAssignmentTokenType(),
-				resultToken);
+		resultToken = handleMathAssignmentOperator(parsedStmt.getVariableName(), savedValue, parsedStmt.getAssignmentTokenType(), resultToken);
 		log.debug("===================> {} = {}", parsedStmt.getVariableName(), resultToken);
 		memory.set(parsedStmt.getVariableName(), getValueAndEval(resultToken));
 	}
@@ -134,12 +134,17 @@ public class Calculator {
 		return value;
 	}
 
-	private Token handleMathAssignmentOperator(String variableName, Token assignmentOperation, Token expressionResult)
+	private Token handleMathAssignmentOperator(String variableName, Integer savedValue, Token assignmentOperation, Token expressionResult)
 			throws StatementException {
 		Queue<Token> postfixTokenQueue = new LinkedList<>();
+		
 
 		if (assignmentOperation != null) {
-			postfixTokenQueue.add(new Token(variableName, TokenType.VARIABLE));
+			if (savedValue == null) {
+				throw new StatementException("Undifined variable" + variableName);
+			}
+
+			postfixTokenQueue.add(new Token(String.valueOf(savedValue), TokenType.INTEGER));
 			postfixTokenQueue.add(expressionResult);
 			postfixTokenQueue.add(assignmentOperation);
 			expressionResult = evaluatePostfixExpression(postfixTokenQueue);

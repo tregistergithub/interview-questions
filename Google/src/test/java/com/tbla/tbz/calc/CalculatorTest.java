@@ -1,12 +1,8 @@
 package com.tbla.tbz.calc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.stream.Stream;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import org.junit.Test;
 
@@ -16,6 +12,7 @@ import com.tbla.tbz.calc.memory.Memory;
 // Unary Minus
 // Double / Float
 // MAX_INTEGER / MIN_INTEGER issues
+// Excessive Plus like 1 + + 1 - won't work
 
 public class CalculatorTest {
 
@@ -210,13 +207,6 @@ public class CalculatorTest {
 		Memory memory = new HashMapMemory();
 		Calculator calc = new Calculator(memory);
 		
-		  int foo = 10 +1+ 1+2*6 + 8/2 ; 
-		foo /= 3+2	 ; 
-			int mimi	=	11 + 		9	* 2+20/3; 
-		mimi /=		2	- 3 ;
-		 		foo	/= mimi + 34;
-		
-
 		Stream.of("  foo =  10 +1+ 1+2*6 + 8/2 ", 
 				"foo /= 3+2	 ", 
 				"	mimi	=	11 + 		9	* 2+20/3", 
@@ -226,4 +216,30 @@ public class CalculatorTest {
 
 		assertEquals("memory", "(foo=-5,mimi=-35)", memory.toString());
 	}
+	
+	@Test
+	public void testPreIncrement() throws Exception {
+		Memory memory = new HashMapMemory();
+		Calculator calc = new Calculator(memory);
+		
+		  int foo =  10 +1+ 1+2*6 + 8/2  ; 
+		  foo += 3+2 + ++foo + ++   foo	 ;
+			int mimi	=	11 + ++foo +		9	* 2+20/3;
+			mimi =		2	- 3 * ++mimi;
+			foo	*= ++mimi + ++  mimi + ++foo + 34;			
+		
+			
+			int i =5;
+			i += ++i + ++i;
+		
+		Stream.of("  foo =  10 +1+ 1+2*6 + 8/2 ", 
+				"foo += 3+2 + ++foo + ++   foo	 ", 
+				"	mimi	=	11 + ++foo +		9	* 2+20/3", 
+				"mimi =		2	- 3 * ++mimi", 
+				" 		foo	*= ++mimi + ++  mimi + ++foo + 34			")
+				.forEach(strStmt -> calc.evalStmtStr(strStmt));
+
+		assertEquals("memory", "(foo=-59427,mimi=-383)", memory.toString());
+	}
+
 }
