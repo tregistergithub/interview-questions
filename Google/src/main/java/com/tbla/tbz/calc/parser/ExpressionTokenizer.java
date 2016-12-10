@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * https://en.wikipedia.org/wiki/Shunting-yard_algorithm
  *
  */
-public class ExpressionTokenizer {
+class ExpressionTokenizer {
 
 	private static List<TokenParsingInfo> tokenParsingInfoList = new ArrayList<>();
 	private static final String REGEXP_VARIABLE = "[a-zA-Z][a-zA-Z0-9_]{0,29}";

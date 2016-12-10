@@ -61,6 +61,24 @@ public class CalculatorTest {
 
 		assertEquals("memory",  "(bar=3,foo=1,joe=1,mimi=11)", memory.toString());
 	}
+	
+	
+	@Test
+	public void testTom() {
+
+		Memory memory = new HashMapMemory();
+		Calculator calc = new Calculator(memory);
+
+		Stream.of("  a = 10 ", 
+				" b = 1000 + 2 * 20 + 2 + ++a ", 
+				"  c = a++ ",
+				" d = 0",
+				"  d += b + a * 2 " 
+				)
+				.forEach(strStmt -> calc.evaluate(strStmt));
+
+		assertEquals("memory",  "(bar=3,foo=1,joe=1,mimi=11)", memory.toString());
+	}
 
 	@Test
 	public void testPlus() {

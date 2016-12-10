@@ -16,7 +16,7 @@ import java.util.*;
 public class StringsTransformer {
 	private List<String> data = new ArrayList<String>();
 
-	public StringsTransformer(List<String> startingData) {
+	public StringsTransformer(List<String> startingData) { 
 		this.data = startingData;
 	}
 

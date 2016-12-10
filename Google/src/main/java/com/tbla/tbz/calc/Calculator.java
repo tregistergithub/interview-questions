@@ -144,7 +144,7 @@ public class Calculator {
 
 				evaluationStack.push(resultToken);
 			}
-		}
+		} 
 		if (evaluationStack.size() != SINGLE_FINAL_RESULT) {
 			throw new StatementException(12, "Missing operator in mathematical expression");
 		}
