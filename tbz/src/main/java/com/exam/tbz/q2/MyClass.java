@@ -1,4 +1,4 @@
-package com.tbla.tbz.q2;
+package com.exam.tbz.q2;
 
 import java.util.Date;
 import java.util.List;

@@ -1,6 +1,7 @@
-package com.tbla.tbz.q3;
+package com.exam.tbz.q3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <b>Question 3</b>

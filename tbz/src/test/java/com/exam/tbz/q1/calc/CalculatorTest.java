@@ -1,4 +1,4 @@
-package com.tbla.tbz.calc;
+package com.exam.tbz.q1.calc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,12 +11,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.tbla.tbz.calc.memory.HashMapMemory;
-import com.tbla.tbz.calc.memory.Memory;
-import com.tbla.tbz.calc.parser.StatementException;
-import com.tbla.tbz.calc.parser.Token;
-import com.tbla.tbz.calc.parser.Token.EvalAction;
-import com.tbla.tbz.calc.parser.TokenType;
+import com.exam.tbz.q1.memory.HashMapMemory;
+import com.exam.tbz.q1.memory.Memory;
+import com.exam.tbz.q1.parser.StatementException;
+import com.exam.tbz.q1.parser.Token;
+import com.exam.tbz.q1.parser.Token.EvalAction;
+import com.exam.tbz.q1.parser.TokenType;
 
 import mockit.Invocation;
 import mockit.Mock;
@@ -77,7 +77,7 @@ public class CalculatorTest {
 				)
 				.forEach(strStmt -> calc.evaluate(strStmt));
 
-		assertEquals("memory",  "(bar=3,foo=1,joe=1,mimi=11)", memory.toString());
+		assertEquals("memory",  "(a=12,b=1053,c=11,d=1077)", memory.toString());
 	}
 
 	@Test

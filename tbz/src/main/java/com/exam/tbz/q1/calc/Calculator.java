@@ -1,4 +1,4 @@
-package com.tbla.tbz.calc;
+package com.exam.tbz.q1.calc;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -7,11 +7,11 @@ import java.util.Stack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.tbla.tbz.calc.memory.Memory;
-import com.tbla.tbz.calc.parser.StatementException;
-import com.tbla.tbz.calc.parser.StatementParser;
-import com.tbla.tbz.calc.parser.Token;
-import com.tbla.tbz.calc.parser.TokenType;
+import com.exam.tbz.q1.memory.Memory;
+import com.exam.tbz.q1.parser.StatementException;
+import com.exam.tbz.q1.parser.StatementParser;
+import com.exam.tbz.q1.parser.Token;
+import com.exam.tbz.q1.parser.TokenType;
 
 /**
  * <p/>
