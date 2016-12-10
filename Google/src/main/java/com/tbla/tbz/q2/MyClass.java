@@ -4,8 +4,17 @@ import java.util.Date;
 import java.util.List;
 
 
+/**
+ * <b>Question 2</b>
+ * <p/> 
+ * The following class has several memory and runtime inefficiencies and bugs.
+ * <p/> 
+ * 
+ * Locate and fix as many as you can.
+ *
+ */
 public class MyClass {
-	private Date m_time;
+	private Date m_time; 
 	private String m_name;
 	private List<Long> m_numbers;
 	private List<String> m_strings;
@@ -34,8 +43,9 @@ public class MyClass {
 	// * Missing @Override annotation
 	public boolean equals(Object obj) {
 		if (obj instanceof MyClass) {
-			return m_name.equals(((MyClass) obj).m_name);
-		}
+			MyClass other = (MyClass) obj;
+			return m_name.equals(other.m_name); 
+		} 
 		return false;
 	}
 
@@ -46,7 +56,7 @@ public class MyClass {
 	public String toString() {
 		String out = m_name;
 		for (long item : m_numbers) {
-			out += " " + item;
+			out += " " + item; // inefficient - should use StringBuilder
 		}
 		return out;
 	}
@@ -68,11 +78,6 @@ public class MyClass {
 		}
 	}
 
-	// Not very effective O(n) - on worst case seatch
-	// should be reduced by sorting - O(LGN) or hashed (O(1))
-	// The downside of this approach is more memory and sorting
-	// The sorting can be lazy to avoid the action if this method is 
-	// never called
 	public boolean containsNumber(long number) {
 		for (long num : m_numbers) {
 			if (num == number) {
